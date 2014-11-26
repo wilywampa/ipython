@@ -1150,13 +1150,9 @@ class IPCompleter(Completer):
                 except TypeError:
                     pass
 
-                if info:
-                    try:
-                        matches[-1] += 'CALLSIG' + info.replace('ArgSpec', obj.__name__)
-                    except:
-                        matches[-1] += 'CALLSIG' + info
+                matches[i] += 'CALLSIG' + info if info else ''
 
-                matches[i] = re.sub('builtin_function_or_method', 'builtin', matches[i])
+                matches[i] = matches[i].replace('builtin_function_or_method', 'builtin')
 
         #io.rprint('COMP TEXT, MATCHES: %r, %r' % (text, self.matches)) # dbg
         return text, matches
