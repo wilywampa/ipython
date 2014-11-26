@@ -477,8 +477,16 @@ class Kernel(Configurable):
 
     def complete_request(self, stream, ident, parent):
         txt, matches = self._complete(parent)
+        metadata = []
+        for i, m in enumerate(matches):
+            if '\0' in m:
+                metadata.append(m.partition('\0')[-1])
+                matches[i] = m.partition('\0')[0]
+            else:
+                metadata.append('')
         matches = {'matches' : matches,
                    'matched_text' : txt,
+                   'metadata' : metadata,
                    'status' : 'ok'}
         matches = json_clean(matches)
         completion_msg = self.session.send(stream, 'complete_reply',
