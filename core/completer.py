@@ -1148,13 +1148,14 @@ class IPCompleter(Completer):
             except (AttributeError, NameError, TypeError, ValueError):
                 try:
                     source = inspect.getsource(self.obj)
+                except (IOError, TypeError):
+                    pass
+                else:
                     def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
                     if def_.startswith('def '):
                         info += def_[4:]
                     elif def_.startswith('class '):
                         info += def_[6:]
-                except (IOError, TypeError):
-                    pass
 
             try:
                 info += inspect.getdoc(self.obj)
