@@ -1135,11 +1135,11 @@ class IPCompleter(Completer):
 
                 info = ''
                 try:
-                    info += self.obj.__name__ + str(funcsigs.signature(self.obj))
+                    info += self.obj.__name__ + str(funcsigs.signature(self.obj)) + '\n\n'
                 except (AttributeError, NameError, TypeError, ValueError):
                     try:
                         source = inspect.getsource(self.obj)
-                        def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')'
+                        def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
                         if def_.startswith('def '):
                             info += def_[4:]
                         elif def_.startswith('class '):
