@@ -1108,18 +1108,16 @@ class IPCompleter(Completer):
         for i, m in enumerate(self.matches):
             try:
                 self.obj = eval(m, self.namespace)
-                self.ns = self.namespace
             except Exception:
                 try:
                     self.obj = eval(m, self.global_namespace)
-                    self.ns = self.global_namespace
                 except Exception:
                     matches.append(m)
                     continue
 
             try:
                 assert(isinstance(self.obj, numpy.ndarray))
-                matches.append(m + '\0' + str(eval(m + '.shape', self.ns)))
+                matches.append(m + '\0ndarray: ' + str(getattr(self.obj, 'shape')))
             except (AssertionError, AttributeError, NameError):
                 try:
                     matches.append(
