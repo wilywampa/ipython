@@ -1134,9 +1134,9 @@ class IPCompleter(Completer):
                     if isinstance(self.obj, TYPES_LIST):
                         matches.append(
                             m + '\0' +
-                            ('%s: %s' %
-                             (type(self.obj).__name__, repr_.repr(
-                                 self.obj)[: 50])))
+                            '%s: %s' %
+                            (type(self.obj).__name__,
+                             repr_.repr(self.obj)[: 50]))
                     else:
                         matches.append(m + '\0' + type(self.obj).__name__)
 
