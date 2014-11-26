@@ -74,6 +74,8 @@ import keyword
 import os
 import re
 import sys
+import numpy
+import types
 
 from IPython.config.configurable import Configurable
 from IPython.core.error import TryNext
@@ -87,6 +89,9 @@ from IPython.utils.traitlets import CBool, Enum
 #-----------------------------------------------------------------------------
 # Globals
 #-----------------------------------------------------------------------------
+
+TYPES_LIST = tuple([getattr(types, a)
+                    for a in dir(types) if isinstance(getattr(types, a), type)])
 
 # Public API
 __all__ = ['Completer','IPCompleter']
@@ -1092,8 +1097,60 @@ class IPCompleter(Completer):
         # use penalize_magics_key to put magics after variables with same name
         self.matches = sorted(set(self.matches), key=penalize_magics_key)
 
+        matches = []
+        for i, m in enumerate(self.matches):
+            try:
+                self.obj = eval(m, self.namespace)
+                self.ns = self.namespace
+            except Exception:
+                try:
+                    self.obj = eval(m, self.global_namespace)
+                    self.ns = self.global_namespace
+                except Exception:
+                    try:
+                        matches.append(m + '\0' + type(self.obj).__name__)
+                    except:
+                        matches.append(m)
+
+            if hasattr(self, 'obj'):
+                try:
+                    assert(isinstance(self.obj, numpy.ndarray))
+                    matches.append(m + '\0' + str(eval(m + '.shape', self.ns)))
+                except:
+                    try:
+                        matches.append(m + '\0' + '%s: %s.%s' % (type(self.obj).__name__, self.obj.__module__, self.obj.__name__))
+                    except:
+                        if isinstance(self.obj, TYPES_LIST):
+                            import repr
+                            repr_ = repr.Repr()
+                            repr_.maxdict = 1
+
+                            matches.append(m + '\0' + ('%s: %s' % (type(self.obj).__name__, repr_.repr(self.obj)[:50])))
+                        else:
+                            matches.append(m + '\0' + type(self.obj).__name__)
+
+                info = ''
+                try:
+                    info += inspect.getargspec(self.obj).__repr__() + '\n'
+                except:
+                    pass
+                try:
+                    info += '%s' % self.obj.__doc__
+                except:
+                    try:
+                        info += '%s' % type(self.obj).__doc__
+                    except:
+                        pass
+                if info:
+                    try:
+                        matches[-1] += 'CALLSIG' + info.replace('ArgSpec', obj.__name__)
+                    except:
+                        matches[-1] += 'CALLSIG' + info
+
+                matches[i] = re.sub('builtin_function_or_method', 'builtin', matches[i])
+
         #io.rprint('COMP TEXT, MATCHES: %r, %r' % (text, self.matches)) # dbg
-        return text, self.matches
+        return text, matches
 
     def rlcomplete(self, text, state):
         """Return the state-th possible completion for 'text'.
