@@ -1126,10 +1126,9 @@ class IPCompleter(Completer):
                         m +
                         '\0' +
                         '%s: %s.%s' %
-                        (type(
-                            self.obj).__name__,
-                            self.obj.__module__,
-                            self.obj.__name__))
+                        (type(self.obj).__name__,
+                         self.obj.__module__,
+                         self.obj.__name__))
                 except AttributeError:
                     if isinstance(self.obj, TYPES_LIST):
                         matches.append(
