@@ -868,6 +868,7 @@ class IPCompleter(Completer):
         def get_keys(obj):
             # Only allow completion for known in-memory dict-like types
             if isinstance(obj, dict) or\
+               _safe_isinstance(obj, 'attrdict', 'AttrDict') or\
                _safe_isinstance(obj, 'pandas', 'DataFrame'):
                 try:
                     return list(obj.keys())
