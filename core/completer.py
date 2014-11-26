@@ -76,6 +76,7 @@ import re
 import sys
 import numpy
 import types
+import repr as REPR
 try:
     import funcsigs
 except ImportError:
@@ -94,6 +95,8 @@ from IPython.utils.traitlets import CBool, Enum
 # Globals
 #-----------------------------------------------------------------------------
 
+repr_ = REPR.Repr()
+repr_.maxdict = 0
 TYPES_LIST = tuple([getattr(types, a)
                     for a in dir(types) if isinstance(getattr(types, a), type)])
 
@@ -1129,10 +1132,6 @@ class IPCompleter(Completer):
                             self.obj.__name__))
                 except:
                     if isinstance(self.obj, TYPES_LIST):
-                        import repr
-                        repr_ = repr.Repr()
-                        repr_.maxdict = 1
-
                         matches.append(
                             m + '\0' +
                             ('%s: %s' %
