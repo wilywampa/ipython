@@ -1111,10 +1111,8 @@ class IPCompleter(Completer):
                     self.obj = eval(m, self.global_namespace)
                     self.ns = self.global_namespace
                 except Exception:
-                    try:
-                        matches.append(m + '\0' + type(self.obj).__name__)
-                    except:
-                        matches.append(m)
+                    matches.append(m)
+                    continue
 
             if hasattr(self, 'obj'):
                 try:
