@@ -1120,7 +1120,7 @@ class IPCompleter(Completer):
             try:
                 assert(isinstance(self.obj, numpy.ndarray))
                 matches.append(m + '\0' + str(eval(m + '.shape', self.ns)))
-            except:
+            except (AssertionError, AttributeError, NameError):
                 try:
                     matches.append(
                         m +
@@ -1130,7 +1130,7 @@ class IPCompleter(Completer):
                             self.obj).__name__,
                             self.obj.__module__,
                             self.obj.__name__))
-                except:
+                except AttributeError:
                     if isinstance(self.obj, TYPES_LIST):
                         matches.append(
                             m + '\0' +
