@@ -1114,45 +1114,44 @@ class IPCompleter(Completer):
                     matches.append(m)
                     continue
 
-            if hasattr(self, 'obj'):
+            try:
+                assert(isinstance(self.obj, numpy.ndarray))
+                matches.append(m + '\0' + str(eval(m + '.shape', self.ns)))
+            except:
                 try:
-                    assert(isinstance(self.obj, numpy.ndarray))
-                    matches.append(m + '\0' + str(eval(m + '.shape', self.ns)))
+                    matches.append(m + '\0' + '%s: %s.%s' % (type(self.obj).__name__, self.obj.__module__, self.obj.__name__))
                 except:
-                    try:
-                        matches.append(m + '\0' + '%s: %s.%s' % (type(self.obj).__name__, self.obj.__module__, self.obj.__name__))
-                    except:
-                        if isinstance(self.obj, TYPES_LIST):
-                            import repr
-                            repr_ = repr.Repr()
-                            repr_.maxdict = 1
+                    if isinstance(self.obj, TYPES_LIST):
+                        import repr
+                        repr_ = repr.Repr()
+                        repr_.maxdict = 1
 
-                            matches.append(m + '\0' + ('%s: %s' % (type(self.obj).__name__, repr_.repr(self.obj)[:50])))
-                        else:
-                            matches.append(m + '\0' + type(self.obj).__name__)
+                        matches.append(m + '\0' + ('%s: %s' % (type(self.obj).__name__, repr_.repr(self.obj)[:50])))
+                    else:
+                        matches.append(m + '\0' + type(self.obj).__name__)
 
-                info = ''
+            info = ''
+            try:
+                info += self.obj.__name__ + str(funcsigs.signature(self.obj)) + '\n\n'
+            except (AttributeError, NameError, TypeError, ValueError):
                 try:
-                    info += self.obj.__name__ + str(funcsigs.signature(self.obj)) + '\n\n'
-                except (AttributeError, NameError, TypeError, ValueError):
-                    try:
-                        source = inspect.getsource(self.obj)
-                        def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
-                        if def_.startswith('def '):
-                            info += def_[4:]
-                        elif def_.startswith('class '):
-                            info += def_[6:]
-                    except (IOError, TypeError):
-                        pass
-
-                try:
-                    info += inspect.getdoc(self.obj)
-                except TypeError:
+                    source = inspect.getsource(self.obj)
+                    def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
+                    if def_.startswith('def '):
+                        info += def_[4:]
+                    elif def_.startswith('class '):
+                        info += def_[6:]
+                except (IOError, TypeError):
                     pass
 
-                matches[i] += 'CALLSIG' + info if info else ''
+            try:
+                info += inspect.getdoc(self.obj)
+            except TypeError:
+                pass
 
-                matches[i] = matches[i].replace('builtin_function_or_method', 'builtin')
+            matches[i] += 'CALLSIG' + info if info else ''
+
+            matches[i] = matches[i].replace('builtin_function_or_method', 'builtin')
 
         #io.rprint('COMP TEXT, MATCHES: %r, %r' % (text, self.matches)) # dbg
         return text, matches
