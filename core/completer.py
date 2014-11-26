@@ -76,6 +76,10 @@ import re
 import sys
 import numpy
 import types
+try:
+    import funcsigs
+except ImportError:
+    pass
 
 from IPython.config.configurable import Configurable
 from IPython.core.error import TryNext
@@ -1131,16 +1135,23 @@ class IPCompleter(Completer):
 
                 info = ''
                 try:
-                    info += inspect.getargspec(self.obj).__repr__() + '\n'
-                except:
-                    pass
-                try:
-                    info += '%s' % self.obj.__doc__
-                except:
+                    info += self.obj.__name__ + str(funcsigs.signature(self.obj))
+                except (AttributeError, NameError, TypeError, ValueError):
                     try:
-                        info += '%s' % type(self.obj).__doc__
-                    except:
+                        source = inspect.getsource(self.obj)
+                        def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')'
+                        if def_.startswith('def '):
+                            info += def_[4:]
+                        elif def_.startswith('class '):
+                            info += def_[6:]
+                    except (IOError, TypeError):
                         pass
+
+                try:
+                    info += inspect.getdoc(self.obj)
+                except TypeError:
+                    pass
+
                 if info:
                     try:
                         matches[-1] += 'CALLSIG' + info.replace('ArgSpec', obj.__name__)
