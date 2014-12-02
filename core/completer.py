@@ -1135,7 +1135,13 @@ class IPCompleter(Completer):
                             (type(obj).__name__,
                              repr_.repr(obj)[: 50]))
                     else:
-                        matches.append(m + '\0' + type(obj).__name__)
+                        try:
+                            matches.append(
+                                m + '\0' +
+                                type(obj).__module__ + '.' +
+                                type(obj).__name__)
+                        except AttributeError:
+                            matches.append(m + '\0' + type(obj).__name__)
 
             info = ''
             try:
