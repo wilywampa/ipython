@@ -1107,44 +1107,44 @@ class IPCompleter(Completer):
         matches = []
         for i, m in enumerate(self.matches):
             try:
-                self.obj = eval(m, self.namespace)
+                obj = eval(m, self.namespace)
             except Exception:
                 try:
-                    self.obj = eval(m, self.global_namespace)
+                    obj = eval(m, self.global_namespace)
                 except Exception:
                     matches.append(m)
                     continue
 
             try:
-                assert(isinstance(self.obj, numpy.ndarray))
-                matches.append(m + '\0ndarray: ' + str(getattr(self.obj, 'shape')))
+                assert(isinstance(obj, numpy.ndarray))
+                matches.append(m + '\0ndarray: ' + str(getattr(obj, 'shape')))
             except (AssertionError, AttributeError, NameError):
                 try:
                     matches.append(
                         m +
                         '\0' +
                         '%s: %s.%s' %
-                        (type(self.obj).__name__,
-                         self.obj.__module__,
-                         self.obj.__name__))
+                        (type(obj).__name__,
+                         obj.__module__,
+                         obj.__name__))
                 except AttributeError:
-                    if isinstance(self.obj, TYPES_LIST):
+                    if type(obj) in TYPES_LIST:
                         matches.append(
                             m + '\0' +
                             '%s: %s' %
-                            (type(self.obj).__name__,
-                             repr_.repr(self.obj)[: 50]))
+                            (type(obj).__name__,
+                             repr_.repr(obj)[: 50]))
                     else:
-                        matches.append(m + '\0' + type(self.obj).__name__)
+                        matches.append(m + '\0' + type(obj).__name__)
 
             info = ''
             try:
-                info += self.obj.__name__ + str(
+                info += obj.__name__ + str(
                     funcsigs.signature(
-                        self.obj)) + '\n\n'
+                        obj)) + '\n\n'
             except (AttributeError, NameError, TypeError, ValueError):
                 try:
-                    source = inspect.getsource(self.obj)
+                    source = inspect.getsource(obj)
                 except (IOError, TypeError):
                     pass
                 else:
@@ -1155,7 +1155,7 @@ class IPCompleter(Completer):
                         info += def_[6:]
 
             try:
-                info += inspect.getdoc(self.obj)
+                info += inspect.getdoc(obj)
             except TypeError:
                 pass
 
