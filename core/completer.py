@@ -1127,7 +1127,7 @@ class IPCompleter(Completer):
                         (type(obj).__name__,
                          obj.__module__,
                          obj.__name__))
-                except AttributeError:
+                except (AttributeError, KeyError):
                     if type(obj) in TYPES_LIST:
                         matches.append(
                             m + '\0' +
@@ -1148,7 +1148,7 @@ class IPCompleter(Completer):
                 info += obj.__name__ + unicode(
                     funcsigs.signature(
                         obj)) + '\n\n'
-            except (AttributeError, NameError, TypeError, ValueError):
+            except (AttributeError, KeyError, NameError, TypeError, ValueError):
                 try:
                     source = unicode(inspect.getsource(obj), 'utf-8')
                 except (IOError, TypeError):
