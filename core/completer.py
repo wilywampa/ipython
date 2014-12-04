@@ -1145,12 +1145,12 @@ class IPCompleter(Completer):
 
             info = ''
             try:
-                info += obj.__name__ + str(
+                info += obj.__name__ + unicode(
                     funcsigs.signature(
                         obj)) + '\n\n'
             except (AttributeError, NameError, TypeError, ValueError):
                 try:
-                    source = inspect.getsource(obj)
+                    source = unicode(inspect.getsource(obj), 'utf-8')
                 except (IOError, TypeError):
                     pass
                 else:
@@ -1161,7 +1161,7 @@ class IPCompleter(Completer):
                         info += def_[6:]
 
             try:
-                info += inspect.getdoc(obj)
+                info += unicode(inspect.getdoc(obj), 'utf-8')
             except TypeError:
                 pass
 
