@@ -100,6 +100,33 @@ repr_.maxdict = 0
 TYPES_LIST = tuple([getattr(types, a)
                     for a in dir(types) if isinstance(getattr(types, a), type)])
 
+
+def _hassource(object):
+    """Check if object has source code worth fetching."""
+    if not hasattr(object, '__call__'):
+        return False
+    if inspect.ismodule(object):
+        if hasattr(object, '__file__'):
+            return True
+        return False
+    if inspect.isclass(object):
+        object = sys.modules.get(object.__module__)
+        if hasattr(object, '__file__'):
+            return True
+        return False
+    if inspect.ismethod(object):
+        object = object.im_func
+    if inspect.isfunction(object):
+        object = object.func_code
+    if inspect.istraceback(object):
+        object = object.tb_frame
+    if inspect.isframe(object):
+        object = object.f_code
+    if inspect.iscode(object):
+        return True
+    return False
+
+
 # Public API
 __all__ = ['Completer','IPCompleter']
 
@@ -1141,21 +1168,23 @@ class IPCompleter(Completer):
                             matches.append(m + '\0' + type(obj).__name__)
 
             info = ''
-            try:
-                info += obj.__name__ + unicode(
-                    funcsigs.signature(
-                        obj)) + '\n\n'
-            except (AttributeError, KeyError, NameError, TypeError, ValueError):
+            if _hassource(obj):
                 try:
-                    source = unicode(inspect.getsource(obj), 'utf-8')
-                except (IOError, TypeError, UnicodeDecodeError):
-                    pass
-                else:
-                    def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
-                    if def_.startswith('def '):
-                        info += def_[4:]
-                    elif def_.startswith('class '):
-                        info += def_[6:]
+                    info += obj.__name__ + unicode(
+                        funcsigs.signature(
+                            obj)) + '\n\n'
+                except (AttributeError, KeyError, NameError, TypeError,
+                        ValueError):
+                    try:
+                        source = unicode(inspect.getsource(obj), 'utf-8')
+                    except (IOError, TypeError, UnicodeDecodeError):
+                        pass
+                    else:
+                        def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
+                        if def_.startswith('def '):
+                            info += def_[4:]
+                        elif def_.startswith('class '):
+                            info += def_[6:]
 
             try:
                 info += unicode(inspect.getdoc(obj), 'utf-8')
