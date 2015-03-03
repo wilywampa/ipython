@@ -1180,7 +1180,8 @@ class IPCompleter(Completer):
                     except (IOError, TypeError):
                         pass
                     else:
-                        def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
+                        def_ = re.sub(r'\s+', ' ', re.split(
+                            r'\)\s*:\s*\n', source)[0]) + ')\n\n'
                         if def_.startswith('def '):
                             info += def_[4:]
                         elif def_.startswith('class '):
