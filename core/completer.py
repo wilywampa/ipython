@@ -1176,8 +1176,8 @@ class IPCompleter(Completer):
                 except (AttributeError, KeyError, NameError, TypeError,
                         ValueError):
                     try:
-                        source = unicode(inspect.getsource(obj), 'utf-8')
-                    except (IOError, TypeError, UnicodeDecodeError):
+                        source = inspect.getsource(obj)
+                    except (IOError, TypeError):
                         pass
                     else:
                         def_ = re.split(r'\)\s*:\s*\n', source)[0] + ')\n\n'
@@ -1187,8 +1187,8 @@ class IPCompleter(Completer):
                             info += def_[6:]
 
             try:
-                info += unicode(inspect.getdoc(obj), 'utf-8')
-            except (TypeError, UnicodeDecodeError):
+                info += inspect.getdoc(obj)
+            except TypeError:
                 pass
 
             matches[i] += 'CALLSIG' + info if info else ''
