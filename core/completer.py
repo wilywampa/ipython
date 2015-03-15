@@ -1192,7 +1192,7 @@ class IPCompleter(Completer):
             except TypeError:
                 pass
 
-            matches[i] += 'CALLSIG' + info if info else ''
+            matches[i] += 'CALLSIG' + info.decode('utf-8') if info else ''
 
             matches[i] = matches[i].replace(
                 'builtin_function_or_method',
