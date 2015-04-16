@@ -1148,10 +1148,10 @@ class IPCompleter(Completer):
             except (AssertionError, AttributeError, NameError):
                 try:
                     matches.append(
-                        m + '\0' + '%s: %s.%s' %
+                        m + '\0' + '%s: %s' %
                         (type(obj).__name__,
-                         obj.__module__,
-                         obj.__name__))
+                         '.'.join(filter(None, [obj.__module__,
+                                                obj.__name__]))))
                 except (AttributeError, KeyError):
                     if type(obj) in TYPES_LIST:
                         matches.append(
@@ -1162,8 +1162,8 @@ class IPCompleter(Completer):
                         try:
                             matches.append(
                                 m + '\0' +
-                                type(obj).__module__ + '.' +
-                                type(obj).__name__)
+                                '.'.join(filter(None, [type(obj).__module__,
+                                                       type(obj).__name__])))
                         except AttributeError:
                             matches.append(m + '\0' + type(obj).__name__)
 
