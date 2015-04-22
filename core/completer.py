@@ -80,7 +80,8 @@ import repr as REPR
 try:
     import funcsigs
 except ImportError:
-    pass
+    import warnings
+    warnings.warn('funcsigs unavailable')
 
 from IPython.config.configurable import Configurable
 from IPython.core.error import TryNext
