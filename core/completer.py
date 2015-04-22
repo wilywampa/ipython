@@ -67,6 +67,7 @@ Notes:
 #-----------------------------------------------------------------------------
 
 import __main__
+import exceptions
 import glob
 import inspect
 import itertools
@@ -100,6 +101,8 @@ repr_ = REPR.Repr()
 repr_.maxdict = 0
 TYPES_LIST = tuple([getattr(types, a)
                     for a in dir(types) if isinstance(getattr(types, a), type)])
+EXCEPTIONS = set(filter(lambda e: type(e) == type and issubclass(e, Exception),
+                        [getattr(exceptions, e) for e in dir(exceptions)]))
 
 
 def _hassource(object):
@@ -1146,14 +1149,20 @@ class IPCompleter(Completer):
             try:
                 assert(isinstance(obj, numpy.ndarray))
                 matches.append(m + '\0ndarray: ' + str(getattr(obj, 'shape')))
-            except (AssertionError, AttributeError, NameError):
+            except Exception as e:
+                if type(e) in EXCEPTIONS - set(
+                        [AssertionError, AttributeError, NameError]):
+                    raise
                 try:
                     matches.append(
                         m + '\0' + '%s: %s' %
                         (type(obj).__name__,
                          '.'.join(filter(None, [obj.__module__,
                                                 obj.__name__]))))
-                except (AttributeError, KeyError):
+                except Exception as e:
+                    if type(e) in EXCEPTIONS - set(
+                            [AttributeError, KeyError]):
+                        raise
                     if type(obj) in TYPES_LIST:
                         matches.append(
                             m + '\0' + '%s: %s' %
@@ -1165,7 +1174,9 @@ class IPCompleter(Completer):
                                 m + '\0' +
                                 '.'.join(filter(None, [type(obj).__module__,
                                                        type(obj).__name__])))
-                        except AttributeError:
+                        except Exception as e:
+                            if type(e) in EXCEPTIONS - set([AttributeError]):
+                                raise
                             matches.append(m + '\0' + type(obj).__name__)
 
             info = ''
@@ -1174,12 +1185,17 @@ class IPCompleter(Completer):
                     info += obj.__name__ + unicode(
                         funcsigs.signature(
                             obj)) + '\n\n'
-                except (AttributeError, KeyError, NameError, TypeError,
-                        ValueError):
+                except Exception as e:
+                    if type(e) in EXCEPTIONS - set(
+                        [AttributeError, KeyError, NameError, TypeError,
+                         ValueError]):
+                        raise
                     try:
-                        source = inspect.getsource(obj)
-                    except (IOError, TypeError):
-                        pass
+                        source = inspect.getsource(obj).decode('utf-8')
+                    except Exception as e:
+                        if type(e) in EXCEPTIONS - set(
+                                [AttributeError, IOError, TypeError]):
+                            raise
                     else:
                         def_ = re.sub(r'\s+', ' ', re.split(
                             r'\)\s*:\s*\n', source)[0]) + ')\n\n'
@@ -1189,11 +1205,12 @@ class IPCompleter(Completer):
                             info += def_[6:]
 
             try:
-                info += inspect.getdoc(obj)
-            except TypeError:
-                pass
+                info += inspect.getdoc(obj).decode('utf-8')
+            except Exception as e:
+                if type(e) in EXCEPTIONS - set([AttributeError, TypeError]):
+                    raise
 
-            matches[i] += 'CALLSIG' + info.decode('utf-8') if info else ''
+            matches[i] += 'CALLSIG' + info if info else ''
 
             matches[i] = matches[i].replace(
                 'builtin_function_or_method',
