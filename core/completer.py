@@ -1161,7 +1161,7 @@ class IPCompleter(Completer):
                                                 obj.__name__]))))
                 except Exception as e:
                     if type(e) in EXCEPTIONS - set(
-                            [AttributeError, KeyError]):
+                            [AttributeError, KeyError, TypeError]):
                         raise
                     if type(obj) in TYPES_LIST:
                         matches.append(
