@@ -1105,6 +1105,7 @@ class IPCompleter(Completer):
 
         # Start with a clean slate of completions
         self.matches[:] = []
+        changed_greedy = False
         custom_res = self.dispatch_custom_completer(text)
         if custom_res is not None:
             # did custom completers produce something?
@@ -1122,6 +1123,19 @@ class IPCompleter(Completer):
                         # Show the ugly traceback if the matcher causes an
                         # exception, but do NOT crash the kernel!
                         sys.excepthook(*sys.exc_info())
+                if not self.matches and self.splitter.delims == GREEDY_DELIMS:
+                    try:
+                        self._greedy_changed('', True, False)
+                        changed_greedy = True
+                        original_text = text
+                        text = self.splitter.split_line(text, cursor_pos)
+                        for matcher in self.matchers:
+                            try:
+                                self.matches.extend(matcher(text))
+                            except:
+                                sys.excepthook(*sys.exc_info())
+                    finally:
+                        self._greedy_changed('', False, True)
             else:
                 for matcher in self.matchers:
                     self.matches = matcher(text)
@@ -1217,6 +1231,10 @@ class IPCompleter(Completer):
                 'builtin')
 
         #io.rprint('COMP TEXT, MATCHES: %r, %r' % (text, self.matches)) # dbg
+        if changed_greedy:
+            start = original_text[:original_text.rindex(text)]
+            matches = [start + m for m in matches]
+            text = original_text
         return text, matches
 
     def rlcomplete(self, text, state):
