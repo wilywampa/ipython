@@ -1165,7 +1165,8 @@ class IPCompleter(Completer):
 
             try:
                 assert(isinstance(obj, numpy.ndarray))
-                matches.append(m + '\0ndarray: ' + str(getattr(obj, 'shape')))
+                matches.append(m + '\0ndarray: %s %s' % (str(obj.shape),
+                                                         str(obj.dtype)))
             except Exception as e:
                 if type(e) in EXCEPTIONS - set(
                         [AssertionError, AttributeError, NameError]):
