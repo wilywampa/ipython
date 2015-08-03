@@ -1131,11 +1131,12 @@ class IPCompleter(Completer):
                         changed_greedy = True
                         original_text = text
                         text = self.splitter.split_line(text, cursor_pos)
-                        for matcher in self.matchers:
-                            try:
-                                self.matches.extend(matcher(text))
-                            except:
-                                sys.excepthook(*sys.exc_info())
+                        if text and not text.endswith(('"', "'")):
+                            for matcher in self.matchers:
+                                try:
+                                    self.matches.extend(matcher(text))
+                                except:
+                                    sys.excepthook(*sys.exc_info())
                     finally:
                         self._greedy_changed('', False, True)
             else:
