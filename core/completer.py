@@ -523,7 +523,7 @@ def _safe_isinstance(obj, module, class_name):
     """Checks if obj is an instance of module.class_name if loaded
     """
     return (module in sys.modules and
-            isinstance(obj, getattr(__import__(module), class_name)))
+            isinstance(obj, getattr(sys.modules[module], class_name)))
 
 
 
@@ -919,6 +919,8 @@ class IPCompleter(Completer):
                     return []
             elif _safe_isinstance(obj, 'numpy', 'ndarray'):
                 return obj.dtype.names or []
+            elif _safe_isinstance(obj, 'numpy.lib.npyio', 'NpzFile'):
+                return obj.files or []
             return []
 
         try:
