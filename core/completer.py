@@ -1238,6 +1238,7 @@ class IPCompleter(Completer):
         if changed_greedy:
             start = original_text[:original_text.rindex(text)]
             matches = [start + m for m in matches]
+            self.matches = matches
             text = original_text
         return text, matches
 
