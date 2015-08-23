@@ -912,6 +912,8 @@ class IPCompleter(Completer):
             # Only allow completion for known in-memory dict-like types
             if isinstance(obj, dict) or\
                _safe_isinstance(obj, 'attrdict', 'AttrDict') or\
+               _safe_isinstance(obj, 'h5py.highlevel', 'AttributeManager') or\
+               _safe_isinstance(obj, 'h5py.highlevel', 'HLObject') or\
                _safe_isinstance(obj, 'pandas', 'DataFrame'):
                 try:
                     return list(obj.keys())

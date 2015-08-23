@@ -13,6 +13,7 @@
 # Imports
 #-----------------------------------------------------------------------------
 from .py3compat import string_types
+import sys
 
 #-----------------------------------------------------------------------------
 # Code
@@ -44,6 +45,13 @@ def get_class_members(cls):
     return ret
 
 
+def _safe_isinstance(obj, module, class_name):
+    """Checks if obj is an instance of module.class_name if loaded
+    """
+    return (module in sys.modules and
+            isinstance(obj, getattr(sys.modules[module], class_name)))
+
+
 def dir2(obj):
     """dir2(obj) -> list of strings
 
@@ -69,6 +77,10 @@ def dir2(obj):
     if safe_hasattr(obj, '__class__'):
         #words.add('__class__')
         words |= set(get_class_members(obj.__class__))
+
+    if _safe_isinstance(obj, 'bunch', 'Bunch') or\
+            _safe_isinstance(obj, 'attrdict', 'AttrDict'):
+        words |= set(obj.keys())
 
 
     # for objects with Enthought's traits, add trait_names() list
