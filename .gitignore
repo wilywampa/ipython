@@ -2,4 +2,5 @@
 !.gitignore
 !*/
 !core/completer.py
+!utils/dir2.py
 !kernel/zmq/ipkernel.py
