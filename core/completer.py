@@ -79,10 +79,9 @@ import numpy
 import types
 import repr as REPR
 try:
-    import funcsigs
+    from funcsigs import signature
 except ImportError:
-    import warnings
-    warnings.warn('funcsigs unavailable')
+    from IPython.utils.signatures import signature
 
 from IPython.config.configurable import Configurable
 from IPython.core.error import TryNext
@@ -1202,9 +1201,7 @@ class IPCompleter(Completer):
             info = ''
             if _hassource(obj):
                 try:
-                    info += obj.__name__ + unicode(
-                        funcsigs.signature(
-                            obj)) + '\n\n'
+                    info += obj.__name__ + unicode(signature(obj)) + '\n\n'
                 except Exception as e:
                     if type(e) in EXCEPTIONS - set(
                         [AttributeError, KeyError, NameError, TypeError,
